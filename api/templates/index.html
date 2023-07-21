@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Users List</title>
+</head>
+<body>
+    <h1>Users List</h1>
+
+    <table border="1">
+        <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Actions</th>
+        </tr>
+        {% for user in users %}
+            <tr>
+                <td>{{ user.name }}</td>
+                <td>{{ user.email }}</td>
+                <td>
+                    <button onclick="updateUser({{ loop.index0 }})">Update</button>
+                    <button onclick="deleteUser({{ loop.index0 }})">Delete</button>
+                </td>
+            </tr>
+        {% endfor %}
+    </table>
+
+    <h2>Add New User</h2>
+    <form onsubmit="return addUser()">
+        <label>Name:</label>
+        <input type="text" id="name" required><br>
+        <label>Email:</label>
+        <input type="email" id="email" required><br>
+        <button type="submit">Add User</button>
+    </form>
+
+    <script>
+        function updateUser(id) {
+            var name = prompt("Enter the new name for this user:");
+            var email = prompt("Enter the new email for this user:");
+            if (name && email) {
+                var user = { "name": name, "email": email };
+                fetch("/users/" + id, {
+                    method: "PUT",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(user)
+                }).then(response => {
+                    if (response.ok) {
+                        location.reload();
+                    }
+                });
+            }
+        }
+
+        function deleteUser(id) {
+            if (confirm("Are you sure you want to delete this user?")) {
+                fetch("/users/" + id, {
+                    method: "DELETE"
+                }).then(response => {
+                    if (response.ok) {
+                        location.reload();
+                    }
+                });
+            }
+        }
+
+        function addUser() {
+            var name = document.getElementById("name").value;
+            var email = document.getElementById("email").value;
+            if (name && email) {
+                var user = { "name": name, "email": email };
+                fetch("/users", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(user)
+                }).then(response => {
+                    if (response.ok) {
+                        location.reload();
+                    }
+                });
+            }
+            return false;
+        }
+    </script>
+</body>
+</html>
